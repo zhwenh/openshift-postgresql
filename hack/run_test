@@ -6,10 +6,13 @@
 # The image has to be available before this script is executed.
 #
 
+test -z "$IMAGE_NAME" -o -z "$VERSION" \
+    && echo 'keep $VERSION and $IMAGE_NAME defined or use "make test"' \
+    && exit 1
+
 set -exo nounset
 shopt -s nullglob
 
-IMAGE_NAME=${IMAGE_NAME-openshift/postgresql-92-centos7-candidate}
 CIDFILE_DIR=$(mktemp --suffix=postgresql_test_cidfiles -d)
 
 function cleanup() {
@@ -233,7 +236,7 @@ function run_tests() {
   CONTAINER_IP=$(get_container_ip $name)
   test_connection $name
   echo "  Testing scl usage"
-  test_scl_usage $name 'psql --version' '9.2'
+  test_scl_usage $name 'psql --version' "$VERSION"
 
   echo "  Testing login accesses"
   assert_login_access "${PGUSER:-}"     "${PASS-}"            "$user_login"
