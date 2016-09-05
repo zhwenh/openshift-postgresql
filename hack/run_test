@@ -334,8 +334,6 @@ function test_value_replication() {
 }
 
 function setup_replication_cluster() {
-  local slave_num=${1-1}
-
   # Run the PostgreSQL master
   run_master $cid_suffix
   local master_ip
@@ -343,7 +341,7 @@ function setup_replication_cluster() {
 
   # Run the PostgreSQL slaves
   local i
-  for i in $(seq $slave_num); do
+  for i in $(seq ${slave_num-1}); do
     run_slave $master_ip $cid_suffix-$i
   done
 
@@ -364,8 +362,7 @@ function run_master_restart_test() {
   master_args="-v ${volume_dir}:/var/lib/pgsql/data:Z"
 
   # Setup the cluster
-  local slave_num=2
-  setup_replication_cluster $slave_num
+  slave_num=2 setup_replication_cluster
 
   echo "Kill the master and create a new one"
   local cidfile=$CIDFILE_DIR/master-$cid_suffix.cid
